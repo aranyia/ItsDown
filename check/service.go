@@ -24,15 +24,15 @@ func (status ServiceStatus) String() string {
 }
 
 type Service struct {
-	Name            string        `json:"name"`
-	Status          ServiceStatus `json:"status"`
-	StatusCheck     StatusCheck
+	Name            string          `json:"name"`
+	Status          ServiceStatus   `json:"status"`
+	StatusCheck     HTTPStatusCheck `json:"statusCheck"`
 	OnChangeActions []func(status ServiceStatus, service Service)
 }
 
 func (service *Service) CheckStatus() {
 	newStatus, _ := service.StatusCheck.Check()
-	log.Println(service.Name+" check HTTP status:", newStatus)
+	log.Printf("'%s' check HTTP status: %s", service.Name, newStatus)
 
 	previousStatus := service.Status
 	service.Status = newStatus
@@ -43,10 +43,10 @@ func (service *Service) CheckStatus() {
 }
 
 func (service *Service) onStatusChange(previous ServiceStatus) {
-	log.Println(service.Name + " service status changed from " + previous.String() + " to " + service.Status.String())
+	log.Printf("'%s' service status changed from %s to %s", service.Name, previous, service.Status)
 
 	if previous == Unknown && service.Status == Up {
-		log.Println("no action taken as service confirmed " + Up.String())
+		log.Printf("no action taken as service confirmed %s", service.Status)
 		return
 	} else {
 		for _, fun := range service.OnChangeActions {

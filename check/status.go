@@ -1,14 +1,17 @@
 package check
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 type StatusCheck interface {
 	Check() (ServiceStatus, interface{})
 }
 
 type HTTPStatusCheck struct {
-	URL        string
-	HTTPMethod string
+	URL        string `json:"url"`
+	HTTPMethod string `json:"httpMethod"`
 }
 
 type HTTPStatusCheckResult struct {
@@ -18,13 +21,21 @@ type HTTPStatusCheckResult struct {
 
 func (statusCheck HTTPStatusCheck) Check() (ServiceStatus, interface{}) {
 	var response *http.Response
+	var err error
+
 	switch statusCheck.HTTPMethod {
 	case http.MethodGet:
-		response, _ = http.Get(statusCheck.URL)
+		response, err = http.Get(statusCheck.URL)
 	case http.MethodPost:
-		response, _ = http.Post(statusCheck.URL, "text/html", nil)
+		response, err = http.Post(statusCheck.URL, "text/html", nil)
 	}
-	return mapStatus(response), HTTPStatusCheckResult{StatusCheck: statusCheck, Response: response}
+
+	if err == nil {
+		return mapStatus(response), HTTPStatusCheckResult{StatusCheck: statusCheck, Response: response}
+	} else {
+		log.Fatalln(err)
+		return Down, nil
+	}
 }
 
 func mapStatus(response *http.Response) ServiceStatus {
