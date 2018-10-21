@@ -13,8 +13,8 @@ func main() {
 	check.Scheduler{
 		UpdateCycle: config.GetCheckIntervaql(),
 		ToFire: func() {
-			for _, service := range services {
-				service.CheckStatus()
+			for i := range services {
+				services[i].CheckStatus()
 			}
 		}}.Start()
 

@@ -19,7 +19,7 @@ type HTTPStatusCheckResult struct {
 	Response    *http.Response
 }
 
-func (statusCheck HTTPStatusCheck) Check() (ServiceStatus, interface{}) {
+func (statusCheck *HTTPStatusCheck) Check() (ServiceStatus, interface{}) {
 	var response *http.Response
 	var err error
 
@@ -31,7 +31,7 @@ func (statusCheck HTTPStatusCheck) Check() (ServiceStatus, interface{}) {
 	}
 
 	if err == nil {
-		return mapStatus(response), HTTPStatusCheckResult{StatusCheck: statusCheck, Response: response}
+		return mapStatus(response), HTTPStatusCheckResult{StatusCheck: *statusCheck, Response: response}
 	} else {
 		log.Fatalln(err)
 		return Down, nil
